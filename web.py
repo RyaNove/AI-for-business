@@ -1,15 +1,23 @@
 import streamlit as st
-import openai
 import os
 
 # 设置页面
 st.set_page_config(page_title="SmartAd - GPT营销文案生成器", page_icon="💡")
 
+# 检查并导入openai
+try:
+    from openai import OpenAI
+    import openai
+    st.sidebar.success("✅ OpenAI库已加载")
+except ImportError:
+    st.error("❌ OpenAI库未安装，请确保requirements.txt中包含openai")
+    st.stop()
+
 # 从Streamlit Secrets获取API密钥
 if 'OPENAI_API_KEY' in st.secrets:
-    openai.api_key = st.secrets['OPENAI_API_KEY']
+    openai_api_key = st.secrets['OPENAI_API_KEY']
+    client = OpenAI(api_key=openai_api_key)
 else:
-    # 如果没有设置secrets，显示设置指南
     st.error("""
     ## 🔑 需要设置OpenAI API密钥
     
@@ -17,7 +25,6 @@ else:
     
     1. **获取API密钥**：
        - 访问 https://platform.openai.com/api-keys
-       - 登录/注册OpenAI账号
        - 点击"Create new secret key"
        - 复制生成的密钥
     
@@ -48,7 +55,7 @@ def generate_with_gpt(brand, product, audience, tone):
         - 包含相关的hashtag
         """
         
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "你是一个专业的市场营销专家，擅长创作吸引人的社交媒体广告文案。"},
@@ -61,12 +68,6 @@ def generate_with_gpt(brand, product, audience, tone):
         
         return response.choices[0].message.content.strip()
         
-    except openai.error.AuthenticationError:
-        return "❌ API密钥错误，请检查密钥是否正确"
-    except openai.error.RateLimitError:
-        return "❌ API调用频率超限，请稍后重试"
-    except openai.error.APIError as e:
-        return f"❌ OpenAI API错误: {str(e)}"
     except Exception as e:
         return f"❌ 生成失败: {str(e)}"
 
@@ -155,7 +156,7 @@ st.sidebar.info("""
 st.sidebar.markdown("---")
 if st.sidebar.button("检查API状态"):
     try:
-        openai.Model.list()
+        client.models.list()
         st.sidebar.success("✅ API连接正常")
-    except:
-        st.sidebar.error("❌ API连接失败")
+    except Exception as e:
+        st.sidebar.error(f"❌ API连接失败: {str(e)}")
