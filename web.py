@@ -1,64 +1,64 @@
 import streamlit as st
 import os
 
-# 设置页面
-st.set_page_config(page_title="SmartAd - GPT营销文案生成器", page_icon="💡")
+# Set up page
+st.set_page_config(page_title="SmartAd - AI Marketing Copy Generator", page_icon="💡")
 
-# 检查并导入openai
+# Check and import openai
 try:
     from openai import OpenAI
     import openai
-    st.sidebar.success("✅ OpenAI库已加载")
+    st.sidebar.success("✅ OpenAI library loaded")
 except ImportError:
-    st.error("❌ OpenAI库未安装，请确保requirements.txt中包含openai")
+    st.error("❌ OpenAI library not installed. Please ensure 'openai' is in requirements.txt")
     st.stop()
 
-# 从Streamlit Secrets获取API密钥
+# Get API key from Streamlit Secrets
 if 'OPENAI_API_KEY' in st.secrets:
     openai_api_key = st.secrets['OPENAI_API_KEY']
     client = OpenAI(api_key=openai_api_key)
 else:
     st.error("""
-    ## 🔑 需要设置OpenAI API密钥
+    ## 🔑 OpenAI API Key Required
     
-    请按照以下步骤操作：
+    Please follow these steps:
     
-    1. **获取API密钥**：
-       - 访问 https://platform.openai.com/api-keys
-       - 点击"Create new secret key"
-       - 复制生成的密钥
+    1. **Get API Key**:
+       - Visit https://platform.openai.com/api-keys
+       - Click "Create new secret key"
+       - Copy the generated key
     
-    2. **在Streamlit Cloud设置**：
-       - 进入应用Settings → Secrets
-       - 添加：
+    2. **Set up in Streamlit Cloud**:
+       - Go to App Settings → Secrets
+       - Add:
        ```toml
-       OPENAI_API_KEY = "你的-api-key-here"
+       OPENAI_API_KEY = "your-api-key-here"
        ```
     """)
     st.stop()
 
 def generate_with_gpt(brand, product, audience, tone):
-    """使用GPT生成广告文案"""
+    """Generate ad copy using GPT"""
     try:
         prompt = f"""
-        为品牌 {brand} 创建一个{tone}风格的Facebook广告文案。
+        Create a {tone.lower()} Facebook ad copy for brand {brand}.
         
-        产品描述: {product}
-        目标受众: {audience}
+        Product Description: {product}
+        Target Audience: {audience}
         
-        要求:
-        - 10-15句话长度
-        - 突出产品的主要优势和情感吸引力
-        - 以鼓励行动的口号结束
-        - 使用{tone}的语气
-        - 内容要吸引人、有说服力
-        - 包含相关的hashtag
+        Requirements:
+        - 10-15 sentences long
+        - Highlight product's key benefits and emotional appeal
+        - End with a compelling call-to-action
+        - Use {tone.lower()} tone of voice
+        - Make it engaging and persuasive
+        - Include relevant hashtags
         """
         
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "你是一个专业的市场营销专家，擅长创作吸引人的社交媒体广告文案。"},
+                {"role": "system", "content": "You are a professional marketing expert specializing in creating engaging social media ad copy."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=800,
@@ -69,94 +69,104 @@ def generate_with_gpt(brand, product, audience, tone):
         return response.choices[0].message.content.strip()
         
     except Exception as e:
-        return f"❌ 生成失败: {str(e)}"
+        return f"❌ Generation failed: {str(e)}"
 
-# 主应用界面
+# Main application interface
 st.title("💡 SmartAd - AI Marketing Copy Generator")
-st.write("使用GPT AI为你的品牌生成吸引人的广告文案！")
+st.write("Generate catchy ad copy for your brand using GPT AI!")
 
-# 用户输入
+# User input
 col1, col2 = st.columns(2)
 
 with col1:
-    brand = st.text_input("品牌名称", "EcoBottle", help="输入你的品牌名称")
+    brand = st.text_input("Brand Name", "EcoBottle", help="Enter your brand name")
     product = st.text_area(
-        "产品描述", 
+        "Product Description", 
         "Eco-friendly reusable water bottle made from recycled materials.",
-        help="详细描述你的产品特点和优势"
+        help="Describe your product features and benefits"
     )
 
 with col2:
     audience = st.text_input(
-        "目标受众", 
+        "Target Audience", 
         "Young professionals who care about sustainability",
-        help="描述你的目标客户群体"
+        help="Describe your target customer group"
     )
     tone = st.selectbox(
-        "语气风格", 
-        ["友好", "专业", "幽默", "鼓舞人心", "正式", "轻松"],
-        help="选择广告文案的语气风格"
+        "Tone of Voice", 
+        ["Friendly", "Professional", "Humorous", "Inspirational", "Formal", "Casual"],
+        help="Select the tone for your ad copy"
     )
 
-# 高级选项
-with st.expander("高级选项"):
+# Advanced options
+with st.expander("Advanced Options"):
     col3, col4 = st.columns(2)
     with col3:
         platform = st.selectbox(
-            "广告平台",
-            ["Facebook", "Instagram", "Twitter", "LinkedIn", "通用"]
+            "Advertising Platform",
+            ["Facebook", "Instagram", "Twitter", "LinkedIn", "General"]
         )
     with col4:
         language = st.selectbox(
-            "语言",
-            ["中文", "English", "双语"]
+            "Language",
+            ["English", "Spanish", "French", "German", "Multilingual"]
         )
 
-# 生成按钮
-if st.button("🚀 生成广告文案", type="primary", use_container_width=True):
+# Generate button
+if st.button("🚀 Generate Ad Copy", type="primary", use_container_width=True):
     if not all([brand, product, audience]):
-        st.warning("请填写所有必填字段")
+        st.warning("Please fill in all required fields")
     else:
-        with st.spinner("🤖 GPT正在创作精彩的广告文案..."):
+        with st.spinner("🤖 GPT is creating amazing ad copy..."):
             output = generate_with_gpt(brand, product, audience, tone)
             
-            st.subheader("✨ AI生成的广告文案:")
+            st.subheader("✨ AI-Generated Ad Copy:")
             
-            # 美化输出
+            # Beautify output
             st.success(output)
             
-            # 添加复制功能
+            # Add copy functionality
             st.code(output, language="markdown")
             
-            # 下载按钮
+            # Download button
             st.download_button(
-                label="📥 下载文案",
+                label="📥 Download Copy",
                 data=output,
                 file_name=f"{brand}_ad_copy.txt",
                 mime="text/plain"
             )
 
-# 侧边栏信息
-st.sidebar.title("ℹ️ 使用说明")
+# Sidebar information
+st.sidebar.title("ℹ️ Instructions")
 st.sidebar.info("""
-**功能特点：**
-- 使用GPT-3.5 Turbo生成高质量文案
-- 支持多种语气风格
-- 针对不同平台优化
-- 一键下载生成结果
+**Features:**
+- Uses GPT-3.5 Turbo for high-quality copy
+- Supports multiple tone styles
+- Optimized for different platforms
+- One-click download results
 
-**使用技巧：**
-1. 详细描述产品特点
-2. 明确目标受众
-3. 选择合适的语气
-4. 可多次生成选择最佳结果
+**Tips for best results:**
+1. Describe product features in detail
+2. Be specific about target audience
+3. Choose appropriate tone
+4. Generate multiple versions to choose the best
 """)
 
-# API状态检查
+# API status check
 st.sidebar.markdown("---")
-if st.sidebar.button("检查API状态"):
+if st.sidebar.button("Check API Status"):
     try:
         client.models.list()
-        st.sidebar.success("✅ API连接正常")
+        st.sidebar.success("✅ API connection successful")
     except Exception as e:
-        st.sidebar.error(f"❌ API连接失败: {str(e)}")
+        st.sidebar.error(f"❌ API connection failed: {str(e)}")
+
+# Additional features
+st.sidebar.markdown("---")
+st.sidebar.subheader("📊 Usage Tips")
+st.sidebar.write("""
+- **For eco-products**: Emphasize sustainability
+- **For tech products**: Highlight innovation
+- **For B2B**: Use professional tone
+- **For B2C**: More friendly and engaging
+""")
