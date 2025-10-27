@@ -40,12 +40,12 @@ else:
 def generate_with_gpt(brand, product, audience, tone, language, platform):
     """Generate ad copy using GPT with language and platform support"""
     try:
-        # Platform-specific instructions
+        # Platform-specific instructions - removed emoji emphasis
         platform_instructions = {
-            "Facebook": "Optimize for Facebook: engaging, shareable content with emojis and hashtags",
-            "Instagram": "Optimize for Instagram: visual language, trending hashtags, emojis",
-            "Twitter": "Optimize for Twitter: concise, direct messaging with relevant hashtags",
-            "LinkedIn": "Optimize for LinkedIn: professional, value-focused, business audience",
+            "Facebook": "Optimize for Facebook: create engaging and shareable content with relevant hashtags",
+            "Instagram": "Optimize for Instagram: use visual descriptive language and trending hashtags",
+            "Twitter": "Optimize for Twitter: create concise, direct messaging with relevant hashtags",
+            "LinkedIn": "Optimize for LinkedIn: professional tone, value-focused content for business audience",
             "General": "Create general social media ad that works across platforms"
         }
         
@@ -64,13 +64,15 @@ def generate_with_gpt(brand, product, audience, tone, language, platform):
         - Use {tone.lower()} tone of voice
         - Make it engaging and persuasive
         - Include relevant hashtags
+        - Use minimal or no emojis
+        - Focus on professional, clean copy
         - {platform_instructions[platform]}
         """
         
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a professional marketing expert who can create engaging ad copy in multiple languages."},
+                {"role": "system", "content": "You are a professional marketing expert who creates clean, professional ad copy with minimal emoji usage."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=800,
@@ -162,6 +164,7 @@ st.sidebar.info("""
 - Platform-specific optimization  
 - Multiple tone styles
 - One-click download
+- Professional, clean copy with minimal emojis
 
 **Supported Languages:**
 - English, Spanish, French, German
@@ -177,4 +180,3 @@ if st.sidebar.button("Check API Status"):
         st.sidebar.success("✅ API connection successful")
     except Exception as e:
         st.sidebar.error(f"❌ API connection failed: {str(e)}")
-
