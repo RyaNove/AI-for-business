@@ -8,7 +8,7 @@ st.set_page_config(page_title="SmartAd - AI Marketing Copy Generator", page_icon
 try:
     from openai import OpenAI
     import openai
-    st.sidebar.success("✅ OpenAI library loaded")
+    st.sidebar.success("OpenAI library loaded")
 except ImportError:
     st.error("❌ OpenAI library not installed. Please ensure 'openai' is in requirements.txt")
     st.stop()
@@ -84,7 +84,7 @@ def generate_with_gpt(brand, product, audience, tone, language, platform):
         return f"❌ Generation failed: {str(e)}"
 
 # Main application interface
-st.title("💡 SmartAd - AI Marketing Copy Generator")
+st.title("SmartAd - AI Marketing Copy Generator")
 st.write("Generate catchy ad copy for your brand using GPT AI!")
 
 # User input
@@ -125,17 +125,17 @@ with st.expander("Advanced Options"):
         )
 
 # Show language and platform selection summary
-st.info(f"🎯 **Settings**: {language} | {platform} | {tone} tone")
+st.info(f"**Settings**: {language} | {platform} | {tone} tone")
 
 # Generate button
-if st.button("🚀 Generate Ad Copy", type="primary", use_container_width=True):
+if st.button("Generate Ad Copy", type="primary", use_container_width=True):
     if not all([brand, product, audience]):
         st.warning("Please fill in all required fields")
     else:
-        with st.spinner(f"🤖 Generating {language} ad copy for {platform}..."):
+        with st.spinner(f"Generating {language} ad copy for {platform}..."):
             output = generate_with_gpt(brand, product, audience, tone, language, platform)
             
-            st.subheader("✨ AI-Generated Ad Copy:")
+            st.subheader("AI-Generated Ad Copy:")
             
             # Show language and platform info
             st.caption(f"**Language**: {language} | **Platform**: {platform} | **Tone**: {tone}")
@@ -148,14 +148,14 @@ if st.button("🚀 Generate Ad Copy", type="primary", use_container_width=True):
             
             # Download button
             st.download_button(
-                label="📥 Download Copy",
+                label="Download Copy",
                 data=output,
                 file_name=f"{brand}_{platform}_{language}_ad_copy.txt",
                 mime="text/plain"
             )
 
 # Sidebar information
-st.sidebar.title("ℹ️ Instructions")
+st.sidebar.title("Instructions")
 st.sidebar.info("""
 **Features:**
 - Multi-language support
@@ -177,3 +177,4 @@ if st.sidebar.button("Check API Status"):
         st.sidebar.success("✅ API connection successful")
     except Exception as e:
         st.sidebar.error(f"❌ API connection failed: {str(e)}")
+
