@@ -37,14 +37,25 @@ else:
     """)
     st.stop()
 
-def generate_with_gpt(brand, product, audience, tone):
-    """Generate ad copy using GPT"""
+def generate_with_gpt(brand, product, audience, tone, language, platform):
+    """Generate ad copy using GPT with language and platform support"""
     try:
-        prompt = f"""
-        Create a {tone.lower()} Facebook ad copy for brand {brand}.
+        # Platform-specific instructions
+        platform_instructions = {
+            "Facebook": "Optimize for Facebook: engaging, shareable content with emojis and hashtags",
+            "Instagram": "Optimize for Instagram: visual language, trending hashtags, emojis",
+            "Twitter": "Optimize for Twitter: concise, direct messaging with relevant hashtags",
+            "LinkedIn": "Optimize for LinkedIn: professional, value-focused, business audience",
+            "General": "Create general social media ad that works across platforms"
+        }
         
-        Product Description: {product}
+        # Single prompt for all languages - GPT can handle the translation
+        prompt = f"""
+        Create a {tone.lower()} {platform} ad copy for {brand}.
+        
+        Product: {product}
         Target Audience: {audience}
+        Language: Write the entire ad copy in {language}
         
         Requirements:
         - 10-15 sentences long
@@ -53,12 +64,13 @@ def generate_with_gpt(brand, product, audience, tone):
         - Use {tone.lower()} tone of voice
         - Make it engaging and persuasive
         - Include relevant hashtags
+        - {platform_instructions[platform]}
         """
         
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a professional marketing expert specializing in creating engaging social media ad copy."},
+                {"role": "system", "content": "You are a professional marketing expert who can create engaging ad copy in multiple languages."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=800,
@@ -109,18 +121,24 @@ with st.expander("Advanced Options"):
     with col4:
         language = st.selectbox(
             "Language",
-            ["English", "Spanish", "French", "German", "Multilingual"]
+            ["English", "Spanish", "French", "German", "Italian", "Portuguese", "Japanese", "Korean", "Chinese"]
         )
+
+# Show language and platform selection summary
+st.info(f"🎯 **Settings**: {language} | {platform} | {tone} tone")
 
 # Generate button
 if st.button("🚀 Generate Ad Copy", type="primary", use_container_width=True):
     if not all([brand, product, audience]):
         st.warning("Please fill in all required fields")
     else:
-        with st.spinner("🤖 GPT is creating amazing ad copy..."):
-            output = generate_with_gpt(brand, product, audience, tone)
+        with st.spinner(f"🤖 Generating {language} ad copy for {platform}..."):
+            output = generate_with_gpt(brand, product, audience, tone, language, platform)
             
             st.subheader("✨ AI-Generated Ad Copy:")
+            
+            # Show language and platform info
+            st.caption(f"**Language**: {language} | **Platform**: {platform} | **Tone**: {tone}")
             
             # Beautify output
             st.success(output)
@@ -132,7 +150,7 @@ if st.button("🚀 Generate Ad Copy", type="primary", use_container_width=True):
             st.download_button(
                 label="📥 Download Copy",
                 data=output,
-                file_name=f"{brand}_ad_copy.txt",
+                file_name=f"{brand}_{platform}_{language}_ad_copy.txt",
                 mime="text/plain"
             )
 
@@ -140,16 +158,15 @@ if st.button("🚀 Generate Ad Copy", type="primary", use_container_width=True):
 st.sidebar.title("ℹ️ Instructions")
 st.sidebar.info("""
 **Features:**
-- Uses GPT-3.5 Turbo for high-quality copy
-- Supports multiple tone styles
-- Optimized for different platforms
-- One-click download results
+- Multi-language support
+- Platform-specific optimization  
+- Multiple tone styles
+- One-click download
 
-**Tips for best results:**
-1. Describe product features in detail
-2. Be specific about target audience
-3. Choose appropriate tone
-4. Generate multiple versions to choose the best
+**Supported Languages:**
+- English, Spanish, French, German
+- Italian, Portuguese, Japanese
+- Korean, Chinese, and more
 """)
 
 # API status check
@@ -160,13 +177,3 @@ if st.sidebar.button("Check API Status"):
         st.sidebar.success("✅ API connection successful")
     except Exception as e:
         st.sidebar.error(f"❌ API connection failed: {str(e)}")
-
-# Additional features
-st.sidebar.markdown("---")
-st.sidebar.subheader("📊 Usage Tips")
-st.sidebar.write("""
-- **For eco-products**: Emphasize sustainability
-- **For tech products**: Highlight innovation
-- **For B2B**: Use professional tone
-- **For B2C**: More friendly and engaging
-""")
